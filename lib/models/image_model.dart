@@ -1,6 +1,6 @@
-class ImageModel {
-  String title;
-  String imagePath;
+class ImageItem {
+  final String path;
+  double rating;
 
-  ImageModel({required this.title, required this.imagePath});
+  ImageItem({required this.path, this.rating = 0.0});
 }

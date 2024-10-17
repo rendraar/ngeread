@@ -1,11 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tes/controllers/image_controller.dart';
 import 'package:tes/views/book_reader_view.dart';
-import 'package:tes/views/comment_view.dart';
 import 'package:tes/views/library_view.dart';
 import 'package:tes/views/profile_view.dart';
 
@@ -102,8 +100,8 @@ class CurrentlyReadingView extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // Panggil BookReaderView dengan file gambar yang sesuai
-        XFile selectedImage = XFile(bookDetail['image']!); // Pastikan ini XFile yang benar
-        Get.to(() => BookReaderView(imageFile: selectedImage)); // Navigasi ke BookReaderView
+        final imagePath = bookDetail['image']!;
+        Get.to(() => BookReaderView(imageFile: XFile(imagePath))); // Navigasi ke BookReaderView
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 8),
@@ -125,7 +123,6 @@ class CurrentlyReadingView extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildSectionTitle(String title) {
     return Padding(
@@ -151,14 +148,20 @@ class CurrentlyReadingView extends StatelessWidget {
   }
 
   Widget _buildImageCover(XFile imageFile) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      width: 120,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        image: DecorationImage(
-          image: FileImage(File(imageFile.path)),
-          fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        // Navigasi ke BookReaderView dengan imageFile yang dipilih
+        Get.to(() => BookReaderView(imageFile: imageFile));
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        width: 120,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          image: DecorationImage(
+            image: FileImage(File(imageFile.path)),
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
