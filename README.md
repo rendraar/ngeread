@@ -1,6 +1,6 @@
 # ngeread
 
-A TUGAS Flutter project.
+A TUGAS Flutter project🤡.
 
 ## Getting Started
 
