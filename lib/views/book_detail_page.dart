@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tes/views/web_view_page.dart';
 import 'article.dart'; // Impor model
 
 class BookDetailPage extends StatelessWidget {
@@ -12,7 +13,7 @@ class BookDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(book.title),
       ),
-      body: Padding(
+      body: SingleChildScrollView(  // Menambahkan SingleChildScrollView
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,6 +27,26 @@ class BookDetailPage extends StatelessWidget {
             Text("Description: ${book.description}"),
             SizedBox(height: 8),
             Text("Price: ${book.price}"),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // Pastikan ada setidaknya satu link
+                if (book.buyLinks.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => WebViewPage(url: book.buyLinks[0].url),
+                    ),
+                  );
+                } else {
+                  // Tangani kasus di mana tidak ada link
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("No buy links available.")),
+                  );
+                }
+              },
+              child: Text("View More"),
+            ),
           ],
         ),
       ),
