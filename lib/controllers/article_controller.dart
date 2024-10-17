@@ -35,7 +35,7 @@ class ArticleController extends GetxController {
   void fetchArticles() async {
     try {
       isLoading(true);
-      final response = await http.get(Uri.parse("https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=2r6tZBhRwjehucaJfFEYv8JLuUpztvgg"));
+      final response = await http.get(Uri.parse("PUT-UR-API-URL-HERE"));
       if (response.statusCode == 200) {
         articles.value = articlesFromJson(response.body);
       } else {
