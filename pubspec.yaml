@@ -41,6 +41,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   webview_flutter: ^4.10.0
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,7 @@ flutter:
     - assets/images/sherlock.jpeg
     - assets/images/uduu.jpg
     - assets/images/tobey.jpeg
+    - .env
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
