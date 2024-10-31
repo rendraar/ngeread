@@ -34,11 +34,12 @@ class ArticleController extends GetxController {
   }
 
   static final API_KEY = dotenv.env["API_KEY"];
+  static final ENDPOINT = dotenv.env["ENDPOINT"];
 
   void fetchArticles() async {
     try {
       isLoading(true);
-      final response = await http.get(Uri.parse("https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=$API_KEY"));
+      final response = await http.get(Uri.parse("$ENDPOINT/svc/books/v3/lists/current/hardcover-fiction.json?api-key=$API_KEY"));
       if (response.statusCode == 200) {
         articles.value = articlesFromJson(response.body);
       } else {
