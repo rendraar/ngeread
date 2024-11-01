@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tes/main.dart';
 import 'package:tes/views/notification/notification_view.dart';
 
+// Init Notification
 Future<void> handleBackgroundMessage(RemoteMessage message) async{
   print("Tittle: ${message.notification?.title}");
   print("Body: ${message.notification?.body}");
