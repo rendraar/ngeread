@@ -3,9 +3,73 @@ import 'package:get/get.dart';
 import 'package:latihan/app/controllers/article_controller.dart';
 import 'package:latihan/app/models/article_detail_page.dart';
 import 'package:latihan/app/models/custom_bottom_navbar.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
-class LibraryView extends StatelessWidget {
+class LibraryView extends StatefulWidget {
+  @override
+  _LibraryViewState createState() => _LibraryViewState();
+}
+
+class _LibraryViewState extends State<LibraryView> {
   final ArticleController controller = Get.put(ArticleController()); // Instansiasi controller
+  final TextEditingController searchController = TextEditingController(); // Controller untuk search
+  late stt.SpeechToText _speech; // Instance Speech-to-Text
+  bool _isListening = false; // Status mendengarkan
+  String _voiceInput = ''; // Hasil input suara
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  Future<void> requestMicrophonePermission() async {
+    var status = await Permission.microphone.request();
+    if (status.isGranted) {
+      print('Microphone permission granted');
+    } else {
+      print('Microphone permission denied');
+    }
+  }
+
+  void _startListening() async {
+    // Ensure permission is granted before proceeding
+    await requestMicrophonePermission();
+
+    bool available = await _speech.initialize(
+      onStatus: (status) => print('Status: $status'),
+      onError: (error) => print('Error: $error'),
+    );
+
+    // Check if speech recognition is available
+    if (!available) {
+      print('Speech recognition is not available');
+      return;
+    }
+
+    setState(() {
+      _isListening = true;
+    });
+
+    // Start listening for speech input
+    _speech.listen(onResult: (result) {
+      setState(() {
+        _voiceInput = result.recognizedWords;
+        searchController.text = _voiceInput; // Sync with the search field
+        searchController.selection = TextSelection.fromPosition(
+          TextPosition(offset: searchController.text.length), // Set cursor to end
+        );
+      });
+    });
+  }
+
+  void _stopListening() {
+    setState(() {
+      _isListening = false;
+    });
+    _speech.stop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,21 +78,21 @@ class LibraryView extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.white, // Warna pertama
-              Colors.cyan.shade100, // Warna kedua
+              Colors.white,
+              Colors.cyan.shade100,
             ],
-            begin: Alignment.topCenter, // Titik awal gradient
-            end: Alignment.bottomCenter, // Titik akhir gradient
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AppBar(
-              backgroundColor: Colors.transparent, // Transparan agar gradien terlihat
+              backgroundColor: Colors.transparent,
               elevation: 0,
               title: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     "API Best Sellers",
@@ -37,27 +101,55 @@ class LibraryView extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  IconButton(
+                    icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
+                    onPressed: () {
+                      if (_isListening) {
+                        _stopListening();
+                      } else {
+                        _startListening();
+                      }
+                    },
+                  ),
                 ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search for books...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _voiceInput = value; // Sinkronisasi input teks manual
+                  });
+                },
               ),
             ),
             Expanded(
               child: Obx(() {
-                // Jika data sedang diambil, tampilkan indikator loading
                 if (controller.isLoading.value) {
                   return Center(child: CircularProgressIndicator());
-                }
-                // Jika data sudah diambil, tampilkan daftar buku
-                else {
+                } else {
+                  final results = controller.articles.value.results.books
+                      .where((book) => book.title.toLowerCase().contains(_voiceInput.toLowerCase()))
+                      .toList();
+
                   return ListView.builder(
-                    itemCount: controller.articles.value.results.books.length,
+                    itemCount: results.length,
                     itemBuilder: (context, index) {
-                      final book = controller.articles.value.results.books[index];
+                      final book = results[index];
                       return ListTile(
-                        leading: Image.network(book.bookImage), // Gambar buku
-                        title: Text(book.title), // Judul buku
-                        subtitle: Text(book.author), // Penulis buku
+                        leading: Image.network(book.bookImage),
+                        title: Text(book.title),
+                        subtitle: Text(book.author),
                         onTap: () {
-                          // Navigasi ke halaman detail buku
                           Get.to(BookDetailPage(book: book));
                         },
                       );
