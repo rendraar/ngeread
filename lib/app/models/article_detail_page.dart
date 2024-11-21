@@ -136,51 +136,6 @@ class _BookDetailPageState extends State<BookDetailPage> {
               },
               child: Text("View More"),
             ),
-            SizedBox(height: 24),
-            Divider(),
-            Text("Music Player", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            TextField(
-              controller: _urlController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: "Enter music URL",
-              ),
-              onChanged: (value) {
-                musicUrl = value;
-              },
-            ),
-            SizedBox(height: 16),
-            Column(
-              children: [
-                // Menampilkan posisi saat ini dan durasi total
-                Text(
-                  "${_formatDuration(currentPosition)} / ${_formatDuration(totalDuration)}",
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.play_arrow),
-                      onPressed: _playMusic,
-                      tooltip: "Play",
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.pause),
-                      onPressed: isPlaying ? _pauseMusic : null,
-                      tooltip: "Pause",
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.stop),
-                      onPressed: isPlaying ? _stopMusic : null,
-                      tooltip: "Stop",
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ],
         ),
       ),
