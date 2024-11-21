@@ -26,8 +26,8 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.slynkle.latihan"
         // Ubah minSdkVersion menjadi 23
-        minSdk = 23 // Ubah dari flutter.minSdkVersion ke 23
-        targetSdk = flutter.targetSdkVersion
+        minSdkVersion 23
+        targetSdkVersion 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

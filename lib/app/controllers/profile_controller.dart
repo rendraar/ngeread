@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   File? profileImage;
   final String defaultImage = "assets/profileDefault.jpg";
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadProfileImage();
+  }
 
   Future<void> editProfileImage() async {
     Get.defaultDialog(
@@ -40,6 +47,7 @@ class ProfileController extends GetxController {
 
       if (image != null && (image.path.endsWith('.png') || image.path.endsWith('.jpg') || image.path.endsWith('.jpeg'))) {
         profileImage = File(image.path);
+        await _saveProfileImage(image.path); // Save to shared_preferences
         Get.back();
         update(); // Update UI
         Get.snackbar("Success", "Profile image updated successfully.");
@@ -53,9 +61,26 @@ class ProfileController extends GetxController {
     }
   }
 
-  void deleteProfileImage() {
+  Future<void> _saveProfileImage(String imagePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profileImage', imagePath);
+  }
+
+  Future<void> _loadProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final imagePath = prefs.getString('profileImage');
+
+    if (imagePath != null && imagePath.isNotEmpty) {
+      profileImage = File(imagePath);
+      update();
+    }
+  }
+
+  void deleteProfileImage() async {
     if (profileImage != null) {
       profileImage = null;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('profileImage'); // Remove from shared_preferences
       update(); // Update UI
       Get.snackbar("Success", "Profile image deleted successfully.");
     } else {
