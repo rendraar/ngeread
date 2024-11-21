@@ -1,6 +1,6 @@
-# latihan
+# ngevie
 
-A new Flutter project.
+An Assignment Flutter project.
 
 ## Getting Started
 
