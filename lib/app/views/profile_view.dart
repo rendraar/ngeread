@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latihan/app/controllers/auth_controller.dart';
@@ -35,31 +37,34 @@ class ProfileView extends StatelessWidget {
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              actions: [
-                PopupMenuButton(
-                  icon: Icon(Icons.more_horiz, color: Colors.black, size: 30),
-                  itemBuilder: (BuildContext context) => [
-                    PopupMenuItem(
-                      child: Text("Edit Profile"),
-                      value: 'edit',
-                    ),
-                    PopupMenuItem(
-                      child: Text("Delete Profile"),
-                      value: 'delete',
-                    ),
-                  ],
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      profileController.editProfileImage();
-                    } else if (value == 'delete') {
-                      profileController.deleteProfileImage();
-                    }
-                  },
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.only(right: 10,),
+              child: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                actions: [
+                  PopupMenuButton(
+                    icon: Icon(Icons.more_horiz, color: Colors.black, size: 30),
+                    itemBuilder: (BuildContext context) => [
+                      PopupMenuItem(
+                        child: Text("Edit Profile"),
+                        value: 'edit',
+                      ),
+                      PopupMenuItem(
+                        child: Text("Delete Profile"),
+                        value: 'delete',
+                      ),
+                    ],
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        profileController.editProfileImage();
+                      } else if (value == 'delete') {
+                        profileController.deleteProfileImage();
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 25, right: 25, top: 5),
@@ -71,12 +76,20 @@ class ProfileView extends StatelessWidget {
             SizedBox(height: 30),
             Center(
               child: GestureDetector(
-                onTap: () => _showProfileImage(context),
-                child: CircleAvatar(
-                  radius: 80,
-                  backgroundImage: profileController.profileImage != null
-                      ? FileImage(profileController.profileImage!)
-                      : AssetImage(profileController.defaultImage) as ImageProvider,
+                onTap: () {
+                  if (profileController.profileImage != null) {
+                    _showProfileImage(context); // Hanya bisa diperbesar jika profileImage tidak null
+                  }
+                },
+                child: GetBuilder<ProfileController>(
+                  builder: (controller) {
+                    return CircleAvatar(
+                      radius: 80,
+                      backgroundImage: controller.profileImage != null
+                          ? FileImage(controller.profileImage!)
+                          : AssetImage(controller.defaultImage) as ImageProvider,
+                    );
+                  },
                 ),
               ),
             ),
@@ -129,11 +142,15 @@ class ProfileView extends StatelessWidget {
               alignment: Alignment.topLeft,
               children: [
                 Center(
-                  child: Image.asset(
-                    profileController.profileImage != null ? profileController.profileImage!.path : profileController.defaultImage,
-                    width: 300,
-                    height: 300,
-                    fit: BoxFit.cover,
+                  child: GetBuilder<ProfileController>(
+                    builder: (controller) {
+                      return Image.file(
+                        controller.profileImage ?? File(controller.defaultImage),
+                        width: 300,
+                        height: 300,
+                        fit: BoxFit.cover,
+                      );
+                    },
                   ),
                 ),
                 Positioned(
