@@ -1,11 +1,11 @@
 {
-    "name": "ngeread",
-    "short_name": "ngeread",
+    "name": "latihan",
+    "short_name": "latihan",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A TUGAS Flutter project.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

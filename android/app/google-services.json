@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "613330901738",
-    "project_id": "akuinginjdidev",
-    "storage_bucket": "akuinginjdidev.appspot.com"
+    "project_number": "560287735840",
+    "project_id": "latihan-1e292",
+    "storage_bucket": "latihan-1e292.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:613330901738:android:8a56ee68f3d98a258b1593",
+        "mobilesdk_app_id": "1:560287735840:android:0dd9288f7b027b8ca25c45",
         "android_client_info": {
-          "package_name": "com.DJawa.ngeread"
+          "package_name": "com.slynkle.latihan"
         }
       },
       "oauth_client": [
         {
-          "client_id": "613330901738-0stqnj9v7c405seqv362m95ki4p6piv1.apps.googleusercontent.com",
+          "client_id": "560287735840-g9di2g95vi1oetaj323ae2adl5si79o7.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCtvysXnhhqPxOmzO3TvFrx6hQl039titg"
+          "current_key": "AIzaSyAyX5F1mSoza8Sclm_C5nvmdDKWE4U7uoM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "613330901738-0stqnj9v7c405seqv362m95ki4p6piv1.apps.googleusercontent.com",
+              "client_id": "560287735840-g9di2g95vi1oetaj323ae2adl5si79o7.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.DJawa.NgeRead" "\0"
-            VALUE "FileDescription", "ngeread" "\0"
+            VALUE "CompanyName", "com.slynkle" "\0"
+            VALUE "FileDescription", "latihan" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "ngeread" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.DJawa.NgeRead. All rights reserved." "\0"
-            VALUE "OriginalFilename", "ngeread.exe" "\0"
-            VALUE "ProductName", "ngeread" "\0"
+            VALUE "InternalName", "latihan" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.slynkle. All rights reserved." "\0"
+            VALUE "OriginalFilename", "latihan.exe" "\0"
+            VALUE "ProductName", "latihan" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

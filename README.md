@@ -1,6 +1,6 @@
-# ngeread
+# latihan
 
-A TUGAS Flutter project.
+A new Flutter project.
 
 ## Getting Started
 
