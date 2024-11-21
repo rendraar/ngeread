@@ -21,6 +21,9 @@ class ProfileView extends StatelessWidget {
       });
     }
 
+    // Set email ke ProfileController
+    profileController.setUserEmail(user?.email ?? "");
+
     String displayName = user?.email?.split('@')[0] ?? "User";
     String email = user?.email ?? "No Email";
 
@@ -47,11 +50,11 @@ class ProfileView extends StatelessWidget {
                     icon: Icon(Icons.more_horiz, color: Colors.black, size: 30),
                     itemBuilder: (BuildContext context) => [
                       PopupMenuItem(
-                        child: Text("Edit Profile"),
+                        child: Text("Edit Photo Profile"),
                         value: 'edit',
                       ),
                       PopupMenuItem(
-                        child: Text("Delete Profile"),
+                        child: Text("Delete Photo Profile"),
                         value: 'delete',
                       ),
                     ],
@@ -99,9 +102,45 @@ class ProfileView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(displayName, style: TextStyle(fontSize: 18)),
+                  Row(
+                    children: [
+                      Text(
+                        "Username:",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          displayName,
+                          style: TextStyle(fontSize: 18),
+                          overflow: TextOverflow.ellipsis, // Untuk menangani teks panjang
+                        ),
+                      ),
+                    ],
+                  ),
                   SizedBox(height: 10),
-                  Text(email, style: TextStyle(fontSize: 18)),
+                  Row(
+                    children: [
+                      Text(
+                        "Email:",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          email,
+                          style: TextStyle(fontSize: 18),
+                          overflow: TextOverflow.ellipsis, // Untuk menangani teks panjang
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

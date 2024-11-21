@@ -9,10 +9,16 @@ class ProfileController extends GetxController {
   File? profileImage;
   final String defaultImage = "assets/profileDefault.jpg";
 
+  String? userEmail; // Tambahkan email pengguna sebagai identifier
+
   @override
   void onInit() {
     super.onInit();
-    _loadProfileImage();
+  }
+
+  void setUserEmail(String email) {
+    userEmail = email;
+    _loadProfileImage(); // Load gambar berdasarkan email
   }
 
   Future<void> editProfileImage() async {
@@ -47,7 +53,7 @@ class ProfileController extends GetxController {
 
       if (image != null && (image.path.endsWith('.png') || image.path.endsWith('.jpg') || image.path.endsWith('.jpeg'))) {
         profileImage = File(image.path);
-        await _saveProfileImage(image.path); // Save to shared_preferences
+        await _saveProfileImage(image.path); // Save to shared_preferences with email as key
         Get.back();
         update(); // Update UI
         Get.snackbar("Success", "Profile image updated successfully.");
@@ -62,16 +68,23 @@ class ProfileController extends GetxController {
   }
 
   Future<void> _saveProfileImage(String imagePath) async {
+    if (userEmail == null) return; // Pastikan email sudah di-set
+
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('profileImage', imagePath);
+    await prefs.setString('profileImage_${userEmail!}', imagePath);
   }
 
   Future<void> _loadProfileImage() async {
+    if (userEmail == null) return; // Pastikan email sudah di-set
+
     final prefs = await SharedPreferences.getInstance();
-    final imagePath = prefs.getString('profileImage');
+    final imagePath = prefs.getString('profileImage_${userEmail!}');
 
     if (imagePath != null && imagePath.isNotEmpty) {
       profileImage = File(imagePath);
+      update();
+    } else {
+      profileImage = null;
       update();
     }
   }
@@ -79,8 +92,10 @@ class ProfileController extends GetxController {
   void deleteProfileImage() async {
     if (profileImage != null) {
       profileImage = null;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('profileImage'); // Remove from shared_preferences
+      if (userEmail != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('profileImage_${userEmail!}'); // Remove based on email
+      }
       update(); // Update UI
       Get.snackbar("Success", "Profile image deleted successfully.");
     } else {

@@ -102,7 +102,7 @@ class HomeView extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 150,
+      height: 200,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: books.length,
@@ -118,7 +118,7 @@ class HomeView extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    height: 100,
+                    height: 120,
                     width: 80,
                     decoration: BoxDecoration(
                       image: DecorationImage(
