@@ -20,6 +20,9 @@ class ProfileView extends StatelessWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.off(() => SigninView());
       });
+    } else {
+      // Set user email in ProfileController
+      profileController.setUserEmail(user.email!);
     }
 
     return Scaffold(
@@ -53,15 +56,15 @@ class ProfileView extends StatelessWidget {
             ],
             onSelected: (value) {
               if (value == 'edit') {
-                profileController.editProfileImage(); // Only edit profile image
+                profileController.editProfileImage();
               } else if (value == 'delete') {
-                profileController.deleteProfileImage(); // Delete profile image
+                profileController.deleteProfileImage();
               } else if (value == 'add_video') {
-                profileController.addVideo(); // Add video from gallery
+                profileController.addVideo();
               } else if (value == 'delete_video') {
-                profileController.deleteProfileVideo(); // Delete profile video
+                profileController.deleteProfileVideo();
               } else if (value == 'logout') {
-                _auth.signOut(); // Sign out the user
+                _auth.signOut();
               }
             },
           ),
@@ -126,18 +129,18 @@ class ProfileView extends StatelessWidget {
                               color: Colors.black54,
                             ),
                           ),
-                          SizedBox(height: 20),
+                          SizedBox(height: 50),
                           // Display Video Player below Profile Picture
                           controller.profileVideo != null
                               ? FutureBuilder<void>(
-                            future: controller.videoController!.initialize(),
+                            future: controller.videoController?.initialize(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.done) {
                                 return Container(
                                   width: MediaQuery.of(context).size.width * 0.8,
                                   height: MediaQuery.of(context).size.height * 0.3,
                                   child: Stack(
-                                    alignment: Alignment.bottomCenter,
+                                    alignment: Alignment.center,
                                     children: [
                                       FittedBox(
                                         fit: BoxFit.cover,
@@ -148,14 +151,12 @@ class ProfileView extends StatelessWidget {
                                         ),
                                       ),
                                       Positioned(
-                                        top: 10,
-                                        right: 10,
                                         child: IconButton(
                                           icon: Icon(
                                             controller.videoController!.value.isPlaying
                                                 ? Icons.pause_circle
                                                 : Icons.play_circle,
-                                            size: 40,
+                                            size: 80,
                                             color: Colors.white,
                                           ),
                                           onPressed: () {
@@ -175,7 +176,7 @@ class ProfileView extends StatelessWidget {
                               }
                             },
                           )
-                              : SizedBox(), // Empty if no video
+                              : SizedBox(),
                         ],
                       );
                     },
