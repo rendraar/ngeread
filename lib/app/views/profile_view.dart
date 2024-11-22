@@ -67,117 +67,126 @@ class ProfileView extends StatelessWidget {
           ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.white, Colors.cyan.shade100],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 25, right: 25, top: 5),
-              child: Text(
-                "My Profile",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
+      body: SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.white, Colors.cyan.shade100],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            SizedBox(height: 30),
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  if (profileController.profileImage != null) {
-                    _showProfileImage(context);
-                  }
-                },
-                child: GetBuilder<ProfileController>(
-                  builder: (controller) {
-                    return Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 80,
-                          backgroundImage: controller.profileImage != null
-                              ? FileImage(controller.profileImage!)
-                              : AssetImage(controller.defaultImage) as ImageProvider,
-                          backgroundColor: Colors.transparent, // Ensure no frame
-                        ),
-                        SizedBox(height: 10),
-                        // Display Video Player below Profile Picture
-                        controller.profileVideo != null
-                            ? FutureBuilder<void>(
-                          future: controller.videoController!.initialize(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.done) {
-                              return Container(
-                                width: MediaQuery.of(context).size.width * 0.8,
-                                height: MediaQuery.of(context).size.height * 0.3, // Constrained height for video
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Stack(
-                                  alignment: Alignment.bottomCenter,
-                                  children: [
-                                    FittedBox(
-                                      fit: BoxFit.cover,
-                                      child: SizedBox(
-                                        width: controller.videoController!.value.size.width,
-                                        height: controller.videoController!.value.size.height,
-                                        child: VideoPlayer(controller.videoController!),
-                                      ),
-                                    ),
-                                    VideoProgressIndicator(
-                                      controller.videoController!,
-                                      allowScrubbing: true,
-                                      colors: VideoProgressColors(
-                                        backgroundColor: Colors.grey,
-                                        playedColor: Colors.cyan,
-                                        bufferedColor: Colors.lightBlue,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 10,
-                                      right: 10,
-                                      child: IconButton(
-                                        icon: Icon(
-                                          controller.videoController!.value.isPlaying
-                                              ? Icons.pause_circle
-                                              : Icons.play_circle,
-                                          size: 40,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () {
-                                          if (controller.videoController!.value.isPlaying) {
-                                            controller.videoController!.pause();
-                                          } else {
-                                            controller.videoController!.play();
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            } else {
-                              return Center(child: CircularProgressIndicator());
-                            }
-                          },
-                        )
-                            : SizedBox(), // Empty if no video
-                      ],
-                    );
-                  },
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 25, right: 25, top: 5),
+                child: Text(
+                  "My Profile",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 30),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    if (profileController.profileImage != null) {
+                      _showProfileImage(context);
+                    }
+                  },
+                  child: GetBuilder<ProfileController>(
+                    builder: (controller) {
+                      return Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 80,
+                            backgroundImage: controller.profileImage != null
+                                ? FileImage(controller.profileImage!)
+                                : AssetImage(controller.defaultImage) as ImageProvider,
+                            backgroundColor: Colors.transparent,
+                          ),
+                          SizedBox(height: 10),
+                          // Username
+                          Text(
+                            "Username: ${user?.email?.split('@').first ?? 'Unknown'}",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          // Email
+                          Text(
+                            "Email: ${user?.email ?? 'Unknown'}",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          // Display Video Player below Profile Picture
+                          controller.profileVideo != null
+                              ? FutureBuilder<void>(
+                            future: controller.videoController!.initialize(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.done) {
+                                return Container(
+                                  width: MediaQuery.of(context).size.width * 0.8,
+                                  height: MediaQuery.of(context).size.height * 0.3,
+                                  child: Stack(
+                                    alignment: Alignment.bottomCenter,
+                                    children: [
+                                      FittedBox(
+                                        fit: BoxFit.cover,
+                                        child: SizedBox(
+                                          width: controller.videoController!.value.size.width,
+                                          height: controller.videoController!.value.size.height,
+                                          child: VideoPlayer(controller.videoController!),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 10,
+                                        right: 10,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            controller.videoController!.value.isPlaying
+                                                ? Icons.pause_circle
+                                                : Icons.play_circle,
+                                            size: 40,
+                                            color: Colors.white,
+                                          ),
+                                          onPressed: () {
+                                            if (controller.videoController!.value.isPlaying) {
+                                              controller.videoController!.pause();
+                                            } else {
+                                              controller.videoController!.play();
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                return Center(child: CircularProgressIndicator());
+                              }
+                            },
+                          )
+                              : SizedBox(), // Empty if no video
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(), // Add the CustomBottomNavBar here
+      bottomNavigationBar: CustomBottomNavBar(),
     );
   }
 
