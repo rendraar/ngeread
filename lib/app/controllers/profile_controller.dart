@@ -12,6 +12,12 @@ class ProfileController extends GetxController {
   VideoPlayerController? videoController;
   final String defaultImage = "assets/profileDefault.jpg";
   String? userEmail; // Email as identifier
+  String? currentLocation;
+
+  void setCurrentLocation(String location) {
+    currentLocation = location;
+    update();
+  }
 
   @override
   void onInit() {
@@ -34,12 +40,14 @@ class ProfileController extends GetxController {
           ElevatedButton.icon(
             icon: Icon(Icons.photo),
             label: Text("Gallery (Image)"),
-            onPressed: () => _pickImageOrVideo(ImageSource.gallery, isVideo: false),
+            onPressed: () =>
+                _pickImageOrVideo(ImageSource.gallery, isVideo: false),
           ),
           ElevatedButton.icon(
             icon: Icon(Icons.camera),
             label: Text("Camera (Image)"),
-            onPressed: () => _pickImageOrVideo(ImageSource.camera, isVideo: false),
+            onPressed: () =>
+                _pickImageOrVideo(ImageSource.camera, isVideo: false),
           ),
         ],
       ),
@@ -56,12 +64,14 @@ class ProfileController extends GetxController {
           ElevatedButton.icon(
             icon: Icon(Icons.video_library),
             label: Text("Gallery (Video)"),
-            onPressed: () => _pickImageOrVideo(ImageSource.gallery, isVideo: true),
+            onPressed: () =>
+                _pickImageOrVideo(ImageSource.gallery, isVideo: true),
           ),
           ElevatedButton.icon(
             icon: Icon(Icons.camera),
             label: Text("Camera (Video)"),
-            onPressed: () => _pickImageOrVideo(ImageSource.camera, isVideo: true),
+            onPressed: () =>
+                _pickImageOrVideo(ImageSource.camera, isVideo: true),
           ),
         ],
       ),
@@ -69,7 +79,8 @@ class ProfileController extends GetxController {
   }
 
   // Pick Image or Video (gallery or camera)
-  Future<void> _pickImageOrVideo(ImageSource source, {bool isVideo = false}) async {
+  Future<void> _pickImageOrVideo(ImageSource source,
+      {bool isVideo = false}) async {
     try {
       if (isVideo) {
         // Pick video from gallery or camera
@@ -81,7 +92,8 @@ class ProfileController extends GetxController {
             ..initialize().then((_) {
               update(); // Update UI after video is initialized
             });
-          await _saveProfileVideo(video.path); // Save video to shared_preferences
+          await _saveProfileVideo(
+              video.path); // Save video to shared_preferences
           Get.back();
           Get.snackbar("Success", "Profile video updated successfully.");
         } else {
@@ -97,7 +109,10 @@ class ProfileController extends GetxController {
           maxHeight: 600,
         );
 
-        if (media != null && (media.path.endsWith('.png') || media.path.endsWith('.jpg') || media.path.endsWith('.jpeg'))) {
+        if (media != null &&
+            (media.path.endsWith('.png') ||
+                media.path.endsWith('.jpg') ||
+                media.path.endsWith('.jpeg'))) {
           profileImage = File(media.path);
           await _saveProfileImage(media.path); // Save to shared_preferences
           Get.back();
@@ -163,7 +178,8 @@ class ProfileController extends GetxController {
       profileImage = null;
       if (userEmail != null) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('profileImage_${userEmail!}'); // Remove image from shared_preferences
+        await prefs.remove(
+            'profileImage_${userEmail!}'); // Remove image from shared_preferences
       }
       update(); // Update UI
       Get.snackbar("Success", "Profile image deleted successfully.");
@@ -178,7 +194,8 @@ class ProfileController extends GetxController {
       profileVideo = null;
       if (userEmail != null) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('profileVideo_${userEmail!}'); // Remove video from shared_preferences
+        await prefs.remove(
+            'profileVideo_${userEmail!}'); // Remove video from shared_preferences
       }
       update(); // Update UI
       Get.snackbar("Success", "Profile video deleted successfully.");

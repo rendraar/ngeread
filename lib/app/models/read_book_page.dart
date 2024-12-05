@@ -149,7 +149,9 @@ class _ReadBookPageState extends State<ReadBookPage> {
                     onChanged: seekAudio,
                   ),
                   Text(
-                    formatDuration(currentPosition) + ' / ' + formatDuration(totalDuration),
+                    formatDuration(currentPosition) +
+                        ' / ' +
+                        formatDuration(totalDuration),
                     style: TextStyle(fontSize: 14),
                   ),
                 ],

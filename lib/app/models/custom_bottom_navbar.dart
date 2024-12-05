@@ -14,7 +14,8 @@ class CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      bool isSignInOrSignUp = navigationController.isSignInPage.value || navigationController.isSignUpPage.value;
+      bool isSignInOrSignUp = navigationController.isSignInPage.value ||
+          navigationController.isSignUpPage.value;
 
       return Container(
         padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -33,48 +34,63 @@ class CustomBottomNavBar extends StatelessWidget {
                 Icons.home,
                 color: isSignInOrSignUp
                     ? Colors.white.withOpacity(0.3)
-                    : (navigationController.selectedIndex.value == 0 ? Colors.white : Colors.white.withOpacity(0.6)),
+                    : (navigationController.selectedIndex.value == 0
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.6)),
               ),
               iconSize: 35,
-              onPressed: isSignInOrSignUp ? null : () {
-                navigationController.changePage(0);
-                Get.off(
-                      () => HomeView(), // Widget untuk halaman Home
-                  transition: Transition.noTransition, // Nonaktifkan animasi transisi
-                );
-              },
+              onPressed: isSignInOrSignUp
+                  ? null
+                  : () {
+                      navigationController.changePage(0);
+                      Get.off(
+                        () => HomeView(), // Widget untuk halaman Home
+                        transition: Transition
+                            .noTransition, // Nonaktifkan animasi transisi
+                      );
+                    },
             ),
             IconButton(
               icon: Icon(
                 Icons.book_rounded,
                 color: isSignInOrSignUp
                     ? Colors.white.withOpacity(0.3)
-                    : (navigationController.selectedIndex.value == 1 ? Colors.white : Colors.white.withOpacity(0.6)),
+                    : (navigationController.selectedIndex.value == 1
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.6)),
               ),
               iconSize: 35,
-              onPressed: isSignInOrSignUp ? null : () {
-                navigationController.changePage(1);
-                Get.off(
-                      () => LibraryView(), // Widget untuk halaman Library
-                  transition: Transition.noTransition, // Nonaktifkan animasi transisi
-                );
-              },
+              onPressed: isSignInOrSignUp
+                  ? null
+                  : () {
+                      navigationController.changePage(1);
+                      Get.off(
+                        () => LibraryView(), // Widget untuk halaman Library
+                        transition: Transition
+                            .noTransition, // Nonaktifkan animasi transisi
+                      );
+                    },
             ),
             IconButton(
               icon: Icon(
                 Icons.person,
                 color: isSignInOrSignUp
                     ? Colors.white.withOpacity(0.3)
-                    : (navigationController.selectedIndex.value == 2 ? Colors.white : Colors.white.withOpacity(0.6)),
+                    : (navigationController.selectedIndex.value == 2
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.6)),
               ),
               iconSize: 35,
-              onPressed: isSignInOrSignUp ? null : () {
-                navigationController.changePage(2);
-                Get.off(
-                      () => ProfileView(), // Widget untuk halaman Profile
-                  transition: Transition.noTransition, // Nonaktifkan animasi transisi
-                );
-              },
+              onPressed: isSignInOrSignUp
+                  ? null
+                  : () {
+                      navigationController.changePage(2);
+                      Get.off(
+                        () => ProfileView(), // Widget untuk halaman Profile
+                        transition: Transition
+                            .noTransition, // Nonaktifkan animasi transisi
+                      );
+                    },
             ),
           ],
         ),

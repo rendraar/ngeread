@@ -12,8 +12,10 @@ class LibraryView extends StatefulWidget {
 }
 
 class _LibraryViewState extends State<LibraryView> {
-  final ArticleController controller = Get.put(ArticleController()); // Instansiasi controller
-  final TextEditingController searchController = TextEditingController(); // Controller untuk search
+  final ArticleController controller =
+      Get.put(ArticleController()); // Instansiasi controller
+  final TextEditingController searchController =
+      TextEditingController(); // Controller untuk search
   late stt.SpeechToText _speech; // Instance Speech-to-Text
   bool _isListening = false; // Status mendengarkan
   String _voiceInput = ''; // Hasil input suara
@@ -58,7 +60,8 @@ class _LibraryViewState extends State<LibraryView> {
         _voiceInput = result.recognizedWords;
         searchController.text = _voiceInput; // Sync with the search field
         searchController.selection = TextSelection.fromPosition(
-          TextPosition(offset: searchController.text.length), // Set cursor to end
+          TextPosition(
+              offset: searchController.text.length), // Set cursor to end
         );
       });
     });
@@ -138,7 +141,9 @@ class _LibraryViewState extends State<LibraryView> {
                   return Center(child: CircularProgressIndicator());
                 } else {
                   final results = controller.articles.value.results.books
-                      .where((book) => book.title.toLowerCase().contains(_voiceInput.toLowerCase()))
+                      .where((book) => book.title
+                          .toLowerCase()
+                          .contains(_voiceInput.toLowerCase()))
                       .toList();
 
                   return ListView.builder(

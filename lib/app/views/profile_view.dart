@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latihan/app/controllers/auth_controller.dart';
 import 'package:latihan/app/controllers/profile_controller.dart';
+import 'package:latihan/app/controllers/maps_controller.dart';
 import 'package:latihan/app/views/auth/signin_view.dart';
 import 'package:latihan/app/models/custom_bottom_navbar.dart';
 import 'package:video_player/video_player.dart';
@@ -11,6 +12,7 @@ import 'package:video_player/video_player.dart';
 class ProfileView extends StatelessWidget {
   final AuthController _auth = Get.find();
   final ProfileController profileController = Get.put(ProfileController());
+  final MapsController mapsController = Get.put(MapsController());
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +26,16 @@ class ProfileView extends StatelessWidget {
       profileController.setUserEmail(user.email!);
     }
 
+    // Memastikan lokasi sudah diperbarui saat halaman dibuka
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mapsController.locationMessage.value ==
+          "Let's trace your location!") {
+        mapsController.getCurrentLocation();
+      }
+    });
+
     return Scaffold(
-      extendBodyBehindAppBar: true, // Untuk menghilangkan perbedaan warna
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -38,6 +48,7 @@ class ProfileView extends StatelessWidget {
               _buildPopupMenuItem('Delete Profile', 'delete'),
               _buildPopupMenuItem('Tambahkan Video', 'add_video'),
               _buildPopupMenuItem('Hapus Video', 'delete_video'),
+              _buildPopupMenuItem('Tambahkan Lokasi', 'add_location'),
               _buildPopupMenuItem('Logout', 'logout'),
             ],
           ),
@@ -52,108 +63,166 @@ class ProfileView extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 25, right: 25, top: 5),
-                child: Text(
-                  "My Profile",
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                ),
-              ),
-              SizedBox(height: 30),
-              Center(
-                child: GestureDetector(
-                  onTap: () {
-                    if (profileController.profileImage != null) {
-                      _showProfileImage(context);
-                    }
-                  },
-                  child: GetBuilder<ProfileController>(
-                    builder: (controller) {
-                      return Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 80,
-                            backgroundImage: controller.profileImage != null
-                                ? FileImage(controller.profileImage!)
-                                : AssetImage(controller.defaultImage) as ImageProvider,
-                            backgroundColor: Colors.transparent,
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            "Username: ${user?.email?.split('@').first ?? 'Unknown'}",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            "Email: ${user?.email ?? 'Unknown'}",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          SizedBox(height: 50),
-                          controller.profileVideo != null
-                              ? FutureBuilder<void>(
-                            future: controller.videoController?.initialize(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.done) {
-                                return Container(
-                                  width: MediaQuery.of(context).size.width * 0.8,
-                                  height: MediaQuery.of(context).size.height * 0.3,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      FittedBox(
-                                        fit: BoxFit.cover,
-                                        child: SizedBox(
-                                          width: controller.videoController!.value.size.width,
-                                          height: controller.videoController!.value.size.height,
-                                          child: VideoPlayer(controller.videoController!),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        child: IconButton(
-                                          icon: Icon(
-                                            controller.videoController!.value.isPlaying
-                                                ? Icons.pause_circle
-                                                : Icons.play_circle,
-                                            size: 80,
-                                            color: Colors.white,
-                                          ),
-                                          onPressed: () {
-                                            if (controller.videoController!.value.isPlaying) {
-                                              controller.videoController!.pause();
-                                            } else {
-                                              controller.videoController!.play();
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              } else {
-                                return Center(child: CircularProgressIndicator());
-                              }
-                            },
-                          )
-                              : SizedBox(),
-                        ],
-                      );
-                    },
+          child: SingleChildScrollView(
+            // Ensure the entire body is scrollable
+            child: Padding(
+              padding:
+                  const EdgeInsets.all(15), // Padding around the entire content
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 25, right: 25, top: 5),
+                    child: Text(
+                      "My Profile",
+                      style:
+                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
+                  SizedBox(height: 30),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (profileController.profileImage != null) {
+                          _showProfileImage(context);
+                        }
+                      },
+                      child: GetBuilder<ProfileController>(
+                        builder: (controller) {
+                          return Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 80,
+                                backgroundImage: controller.profileImage != null
+                                    ? FileImage(controller.profileImage!)
+                                    : AssetImage(controller.defaultImage)
+                                        as ImageProvider,
+                                backgroundColor: Colors.transparent,
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                "Username: ${user?.email?.split('@').first ?? 'Unknown'}",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                "Email: ${user?.email ?? 'Unknown'}",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Obx(() => Text(
+                                    mapsController.locationMessage.value,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black54,
+                                    ),
+                                  )),
+                              SizedBox(height: 10),
+                              ElevatedButton(
+                                onPressed: mapsController.openGoogleMaps,
+                                child: Text("Open in Google Maps"),
+                              ),
+                              SizedBox(height: 50),
+                              // Add video display with proper padding
+                              controller.profileVideo != null
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(top: 20),
+                                      child: FutureBuilder<void>(
+                                        future: controller.videoController
+                                            ?.initialize(),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.done) {
+                                            return Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.8,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.3,
+                                              child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  FittedBox(
+                                                    fit: BoxFit.cover,
+                                                    child: SizedBox(
+                                                      width: controller
+                                                          .videoController!
+                                                          .value
+                                                          .size
+                                                          .width,
+                                                      height: controller
+                                                          .videoController!
+                                                          .value
+                                                          .size
+                                                          .height,
+                                                      child: VideoPlayer(
+                                                          controller
+                                                              .videoController!),
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    child: IconButton(
+                                                      icon: Icon(
+                                                        controller
+                                                                .videoController!
+                                                                .value
+                                                                .isPlaying
+                                                            ? Icons.pause_circle
+                                                            : Icons.play_circle,
+                                                        size: 80,
+                                                        color: Colors.white,
+                                                      ),
+                                                      onPressed: () {
+                                                        if (controller
+                                                            .videoController!
+                                                            .value
+                                                            .isPlaying) {
+                                                          controller
+                                                              .videoController!
+                                                              .pause();
+                                                        } else {
+                                                          controller
+                                                              .videoController!
+                                                              .play();
+                                                        }
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          } else {
+                                            return Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          }
+                                        },
+                                      ),
+                                    )
+                                  : SizedBox(),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -161,7 +230,6 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  // Fungsi Pendukung untuk PopupMenu
   PopupMenuItem<String> _buildPopupMenuItem(String text, String value) {
     return PopupMenuItem(
       child: Text(text),
@@ -169,7 +237,7 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  void _handleMenuAction(String value) {
+  void _handleMenuAction(String value) async {
     switch (value) {
       case 'edit':
         profileController.editProfileImage();
@@ -183,46 +251,32 @@ class ProfileView extends StatelessWidget {
       case 'delete_video':
         profileController.deleteProfileVideo();
         break;
+      case 'add_location':
+        await mapsController.getCurrentLocation();
+        break;
       case 'logout':
         _auth.signOut();
         break;
     }
   }
 
-  // Fungsi Menampilkan Gambar Profil
   void _showProfileImage(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: Scaffold(
-            backgroundColor: Colors.black.withOpacity(0.3),
-            body: Stack(
-              alignment: Alignment.topLeft,
-              children: [
-                Center(
-                  child: GetBuilder<ProfileController>(
-                    builder: (controller) {
-                      return Image.file(
-                        controller.profileImage ?? File(controller.defaultImage),
-                        width: 300,
-                        height: 300,
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
-                ),
-                Positioned(
-                  top: 40,
-                  left: 20,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
-              ],
+        return Scaffold(
+          backgroundColor: Colors.black.withOpacity(0.3),
+          body: Center(
+            child: GetBuilder<ProfileController>(
+              builder: (controller) {
+                return Image.file(
+                  controller.profileImage ?? File(controller.defaultImage),
+                  width: 300,
+                  height: 300,
+                  fit: BoxFit.cover,
+                );
+              },
             ),
           ),
         );
