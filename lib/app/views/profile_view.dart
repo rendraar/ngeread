@@ -21,64 +21,37 @@ class ProfileView extends StatelessWidget {
         Get.off(() => SigninView());
       });
     } else {
-      // Set user email in ProfileController
       profileController.setUserEmail(user.email!);
     }
 
     return Scaffold(
+      extendBodyBehindAppBar: true, // Untuk menghilangkan perbedaan warna
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          PopupMenuButton(
+          PopupMenuButton<String>(
             icon: Icon(Icons.more_horiz, color: Colors.black, size: 30),
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem(
-                child: Text("Edit Profile"),
-                value: 'edit',
-              ),
-              PopupMenuItem(
-                child: Text("Delete Profile"),
-                value: 'delete',
-              ),
-              PopupMenuItem(
-                child: Text("Tambahkan Video"),
-                value: 'add_video',
-              ),
-              PopupMenuItem(
-                child: Text("Hapus Video"),
-                value: 'delete_video',
-              ),
-              PopupMenuItem(
-                child: Text("Logout"),
-                value: 'logout',
-              ),
+            onSelected: (value) => _handleMenuAction(value),
+            itemBuilder: (context) => [
+              _buildPopupMenuItem('Edit Profile', 'edit'),
+              _buildPopupMenuItem('Delete Profile', 'delete'),
+              _buildPopupMenuItem('Tambahkan Video', 'add_video'),
+              _buildPopupMenuItem('Hapus Video', 'delete_video'),
+              _buildPopupMenuItem('Logout', 'logout'),
             ],
-            onSelected: (value) {
-              if (value == 'edit') {
-                profileController.editProfileImage();
-              } else if (value == 'delete') {
-                profileController.deleteProfileImage();
-              } else if (value == 'add_video') {
-                profileController.addVideo();
-              } else if (value == 'delete_video') {
-                profileController.deleteProfileVideo();
-              } else if (value == 'logout') {
-                _auth.signOut();
-              }
-            },
           ),
         ],
       ),
-      body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.white, Colors.cyan.shade100],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Colors.cyan.shade100],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
+        ),
+        child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,7 +83,6 @@ class ProfileView extends StatelessWidget {
                             backgroundColor: Colors.transparent,
                           ),
                           SizedBox(height: 10),
-                          // Username
                           Text(
                             "Username: ${user?.email?.split('@').first ?? 'Unknown'}",
                             style: TextStyle(
@@ -120,7 +92,6 @@ class ProfileView extends StatelessWidget {
                             ),
                           ),
                           SizedBox(height: 5),
-                          // Email
                           Text(
                             "Email: ${user?.email ?? 'Unknown'}",
                             style: TextStyle(
@@ -130,7 +101,6 @@ class ProfileView extends StatelessWidget {
                             ),
                           ),
                           SizedBox(height: 50),
-                          // Display Video Player below Profile Picture
                           controller.profileVideo != null
                               ? FutureBuilder<void>(
                             future: controller.videoController?.initialize(),
@@ -191,6 +161,35 @@ class ProfileView extends StatelessWidget {
     );
   }
 
+  // Fungsi Pendukung untuk PopupMenu
+  PopupMenuItem<String> _buildPopupMenuItem(String text, String value) {
+    return PopupMenuItem(
+      child: Text(text),
+      value: value,
+    );
+  }
+
+  void _handleMenuAction(String value) {
+    switch (value) {
+      case 'edit':
+        profileController.editProfileImage();
+        break;
+      case 'delete':
+        profileController.deleteProfileImage();
+        break;
+      case 'add_video':
+        profileController.addVideo();
+        break;
+      case 'delete_video':
+        profileController.deleteProfileVideo();
+        break;
+      case 'logout':
+        _auth.signOut();
+        break;
+    }
+  }
+
+  // Fungsi Menampilkan Gambar Profil
   void _showProfileImage(BuildContext context) {
     showDialog(
       context: context,
