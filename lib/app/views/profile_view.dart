@@ -55,6 +55,8 @@ class ProfileView extends StatelessWidget {
         ],
       ),
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.white, Colors.cyan.shade100],
@@ -64,16 +66,13 @@ class ProfileView extends StatelessWidget {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            // Ensure the entire body is scrollable
             child: Padding(
-              padding:
-                  const EdgeInsets.all(15), // Padding around the entire content
+              padding: const EdgeInsets.all(15),
               child: Column(
-                mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(left: 25, right: 25, top: 5),
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: Text(
                       "My Profile",
                       style:
@@ -134,86 +133,80 @@ class ProfileView extends StatelessWidget {
                                 child: Text("Open in Google Maps"),
                               ),
                               SizedBox(height: 50),
-                              // Add video display with proper padding
-                              controller.profileVideo != null
-                                  ? Padding(
-                                      padding: const EdgeInsets.only(top: 20),
-                                      child: FutureBuilder<void>(
-                                        future: controller.videoController
-                                            ?.initialize(),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.done) {
-                                            return Container(
-                                              width: MediaQuery.of(context)
+                              if (controller.profileVideo != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 20),
+                                  child: FutureBuilder<void>(
+                                    future: controller.videoController
+                                        ?.initialize(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.done) {
+                                        return Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.8,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.3,
+                                          child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              FittedBox(
+                                                fit: BoxFit.cover,
+                                                child: SizedBox(
+                                                  width: controller
+                                                      .videoController!
+                                                      .value
                                                       .size
-                                                      .width *
-                                                  0.8,
-                                              height: MediaQuery.of(context)
+                                                      .width,
+                                                  height: controller
+                                                      .videoController!
+                                                      .value
                                                       .size
-                                                      .height *
-                                                  0.3,
-                                              child: Stack(
-                                                alignment: Alignment.center,
-                                                children: [
-                                                  FittedBox(
-                                                    fit: BoxFit.cover,
-                                                    child: SizedBox(
-                                                      width: controller
-                                                          .videoController!
-                                                          .value
-                                                          .size
-                                                          .width,
-                                                      height: controller
-                                                          .videoController!
-                                                          .value
-                                                          .size
-                                                          .height,
-                                                      child: VideoPlayer(
-                                                          controller
-                                                              .videoController!),
-                                                    ),
-                                                  ),
-                                                  Positioned(
-                                                    child: IconButton(
-                                                      icon: Icon(
-                                                        controller
-                                                                .videoController!
-                                                                .value
-                                                                .isPlaying
-                                                            ? Icons.pause_circle
-                                                            : Icons.play_circle,
-                                                        size: 80,
-                                                        color: Colors.white,
-                                                      ),
-                                                      onPressed: () {
-                                                        if (controller
-                                                            .videoController!
-                                                            .value
-                                                            .isPlaying) {
-                                                          controller
-                                                              .videoController!
-                                                              .pause();
-                                                        } else {
-                                                          controller
-                                                              .videoController!
-                                                              .play();
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                ],
+                                                      .height,
+                                                  child: VideoPlayer(controller
+                                                      .videoController!),
+                                                ),
                                               ),
-                                            );
-                                          } else {
-                                            return Center(
-                                                child:
-                                                    CircularProgressIndicator());
-                                          }
-                                        },
-                                      ),
-                                    )
-                                  : SizedBox(),
+                                              Positioned(
+                                                child: IconButton(
+                                                  icon: Icon(
+                                                    controller.videoController!
+                                                            .value.isPlaying
+                                                        ? Icons.pause_circle
+                                                        : Icons.play_circle,
+                                                    size: 80,
+                                                    color: Colors.white,
+                                                  ),
+                                                  onPressed: () {
+                                                    if (controller
+                                                        .videoController!
+                                                        .value
+                                                        .isPlaying) {
+                                                      controller
+                                                          .videoController!
+                                                          .pause();
+                                                    } else {
+                                                      controller
+                                                          .videoController!
+                                                          .play();
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      } else {
+                                        return Center(
+                                            child: CircularProgressIndicator());
+                                      }
+                                    },
+                                  ),
+                                ),
                             ],
                           );
                         },
