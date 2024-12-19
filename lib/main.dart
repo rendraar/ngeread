@@ -2,17 +2,23 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:latihan/app/views/auth/signin_view.dart';
-import 'package:latihan/app/views/home_view.dart';
+import 'package:latihan/dependency_injection.dart';
 import 'app/controllers/auth_controller.dart';
-import 'app/controllers/navigator_controller.dart';
+import 'app/controllers/notification_controller.dart';
+import 'app/views/auth/signin_view.dart';
+import 'app/views/home_view.dart';
+import 'app/views/notification_view.dart';
+
+final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // Inisialisasi Firebase
+  await NotificationController().initNotification();
   await dotenv.load(fileName: ".env");
+  DependencyInjection.init();
+
   Get.lazyPut<AuthController>(() => AuthController());
-  Get.lazyPut<NavigationController>(() => NavigationController());
   runApp(MyApp());
 }
 
@@ -20,6 +26,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -33,7 +40,10 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/login', page: () => SigninView()),
         GetPage(name: '/home', page: () => HomeView()),
-        // Anda dapat menambahkan halaman lainnya di sini jika diperlukan
+        GetPage(
+          name: NotificationView.route,
+          page: () => NotificationView(),
+        ),
       ],
     );
   }
@@ -45,7 +55,7 @@ class Root extends StatelessWidget {
     return Obx(() {
       final authController = Get.find<AuthController>();
       if (authController.isAuthenticated()) {
-        return HomeView(); // Ganti HomeView dengan MainNavController
+        return HomeView();
       } else {
         return SigninView();
       }
