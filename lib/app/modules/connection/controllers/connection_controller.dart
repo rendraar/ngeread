@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:latihan/app/views/home_view.dart';
 import '../views/no_connection_view.dart';
+import 'package:latihan/app/controllers/auth_controller.dart';
 
 class ConnectionController extends GetxController {
   final Connectivity _connectivity = Connectivity();
@@ -33,6 +34,7 @@ class ConnectionController extends GetxController {
       if (Get.currentRoute == '/NoConnectionView') {
         Get.offAll(() => HomeView());
       }
+      AuthController.instance.uploadPendingData(); // Pastikan data tertunda diupload ketika koneksi kembali
     }
   }
 
