@@ -6,18 +6,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class ProfileController extends GetxController {
+  // Dependencies
   final ImagePicker _picker = ImagePicker();
+
+  // Profile data
   File? profileImage;
   File? profileVideo;
   VideoPlayerController? videoController;
-  final String defaultImage = "assets/profileDefault.jpg";
   String? userEmail; // Email as identifier
   String? currentLocation;
+  String? username;
 
-  void setCurrentLocation(String location) {
-    currentLocation = location;
-    update();
-  }
+  // Default image if no profile picture
+  final String defaultImage = "assets/profileDefault.jpg";
+
+  // Reactive state variables
+  var isLoading = false.obs;
 
   @override
   void onInit() {
@@ -25,141 +29,50 @@ class ProfileController extends GetxController {
     _loadProfile(); // Load profile when controller is initialized
   }
 
+  // Set current user email and reload profile
   void setUserEmail(String email) {
     userEmail = email;
-    _loadProfile(); // Load profile data (image or video) based on email
+    _loadProfile();
+    update();
   }
 
-  // Handle profile image update (edit only image)
-  Future<void> editProfileImage() async {
-    Get.defaultDialog(
-      title: "Update Profile Picture",
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ElevatedButton.icon(
-            icon: Icon(Icons.photo),
-            label: Text("Gallery (Image)"),
-            onPressed: () =>
-                _pickImageOrVideo(ImageSource.gallery, isVideo: false),
-          ),
-          ElevatedButton.icon(
-            icon: Icon(Icons.camera),
-            label: Text("Camera (Image)"),
-            onPressed: () =>
-                _pickImageOrVideo(ImageSource.camera, isVideo: false),
-          ),
-        ],
-      ),
-    );
+  // Set current location
+  void setCurrentLocation(String location) {
+    currentLocation = location;
+    update();
   }
 
-  // Handle video update (add video only)
-  Future<void> addVideo({bool fromCamera = false}) async {
-    Get.defaultDialog(
-      title: "Add Profile Video",
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ElevatedButton.icon(
-            icon: Icon(Icons.video_library),
-            label: Text("Gallery (Video)"),
-            onPressed: () =>
-                _pickImageOrVideo(ImageSource.gallery, isVideo: true),
-          ),
-          ElevatedButton.icon(
-            icon: Icon(Icons.camera),
-            label: Text("Camera (Video)"),
-            onPressed: () =>
-                _pickImageOrVideo(ImageSource.camera, isVideo: true),
-          ),
-        ],
-      ),
-    );
-  }
+  // Update username and save it in SharedPreferences
+  Future<void> updateUsername(String newUsername) async {
+    username = newUsername;
+    if (userEmail != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('username_${userEmail!}', newUsername);
 
-  // Pick Image or Video (gallery or camera)
-  Future<void> _pickImageOrVideo(ImageSource source,
-      {bool isVideo = false}) async {
-    try {
-      if (isVideo) {
-        // Pick video from gallery or camera
-        final XFile? video = await _picker.pickVideo(source: source);
-
-        if (video != null && video.path.endsWith('.mp4')) {
-          profileVideo = File(video.path);
-          videoController = VideoPlayerController.file(profileVideo!)
-            ..initialize().then((_) {
-              update(); // Update UI after video is initialized
-            });
-          await _saveProfileVideo(
-              video.path); // Save video to shared_preferences
-          Get.back();
-          Get.snackbar("Success", "Profile video updated successfully.");
-        } else {
-          Get.back();
-          Get.snackbar("Error", "Only MP4 videos are allowed.");
-        }
-      } else {
-        // Pick image from gallery or camera
-        final XFile? media = await _picker.pickImage(
-          source: source,
-          imageQuality: 100,
-          maxWidth: 600,
-          maxHeight: 600,
-        );
-
-        if (media != null &&
-            (media.path.endsWith('.png') ||
-                media.path.endsWith('.jpg') ||
-                media.path.endsWith('.jpeg'))) {
-          profileImage = File(media.path);
-          await _saveProfileImage(media.path); // Save to shared_preferences
-          Get.back();
-          update(); // Update UI
-          Get.snackbar("Success", "Profile image updated successfully.");
-        } else {
-          Get.back();
-          Get.snackbar("Error", "Only PNG, JPG, JPEG files are allowed.");
-        }
-      }
-    } catch (e) {
-      Get.back();
-      Get.snackbar("Error", "Failed to pick media: $e");
+      print(userEmail);
+      print(prefs.get("username_"));
     }
+    update();
+    Get.snackbar("Success", "Username updated successfully.");
   }
 
-  // Save Profile Image to SharedPreferences
-  Future<void> _saveProfileImage(String imagePath) async {
-    if (userEmail == null) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('profileImage_${userEmail!}', imagePath);
-  }
-
-  // Save Profile Video to SharedPreferences
-  Future<void> _saveProfileVideo(String videoPath) async {
-    if (userEmail == null) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('profileVideo_${userEmail!}', videoPath);
-  }
-
-  // Load Profile Image and Video from SharedPreferences
+  // Load profile data from SharedPreferences
   Future<void> _loadProfile() async {
     if (userEmail == null) return;
 
     final prefs = await SharedPreferences.getInstance();
     final imagePath = prefs.getString('profileImage_${userEmail!}');
     final videoPath = prefs.getString('profileVideo_${userEmail!}');
+    final storedUsername = prefs.getString('username_${userEmail!}');
 
-    if (imagePath != null && imagePath.isNotEmpty) {
-      profileImage = File(imagePath);
-    } else {
-      profileImage = null;
-    }
+    // Load stored username
+    username = storedUsername;
 
-    if (videoPath != null && videoPath.isNotEmpty) {
+    // Load profile image
+    profileImage = imagePath != null ? File(imagePath) : null;
+
+    // Load profile video and initialize controller
+    if (videoPath != null) {
       profileVideo = File(videoPath);
       videoController = VideoPlayerController.file(profileVideo!)
         ..initialize().then((_) {
@@ -172,35 +85,142 @@ class ProfileController extends GetxController {
     update();
   }
 
-  // Delete Profile Image
-  void deleteProfileImage() async {
+  // Edit profile image
+  Future<void> editProfileImage() async {
+    Get.defaultDialog(
+      title: "Update Profile Picture",
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton.icon(
+            icon: Icon(Icons.photo),
+            label: Text("Gallery"),
+            onPressed: () => _pickImageOrVideo(ImageSource.gallery, isVideo: false),
+          ),
+          ElevatedButton.icon(
+            icon: Icon(Icons.camera),
+            label: Text("Camera"),
+            onPressed: () => _pickImageOrVideo(ImageSource.camera, isVideo: false),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Add profile video
+  Future<void> addVideo() async {
+    Get.defaultDialog(
+      title: "Add Profile Video",
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton.icon(
+            icon: Icon(Icons.video_library),
+            label: Text("Gallery"),
+            onPressed: () => _pickImageOrVideo(ImageSource.gallery, isVideo: true),
+          ),
+          ElevatedButton.icon(
+            icon: Icon(Icons.camera),
+            label: Text("Camera"),
+            onPressed: () => _pickImageOrVideo(ImageSource.camera, isVideo: true),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Pick image or video
+  Future<void> _pickImageOrVideo(ImageSource source, {required bool isVideo}) async {
+    try {
+      isLoading.value = true;
+
+      if (isVideo) {
+        final XFile? video = await _picker.pickVideo(source: source);
+        if (video != null) {
+          profileVideo = File(video.path);
+          videoController = VideoPlayerController.file(profileVideo!)
+            ..initialize().then((_) {
+              update();
+            });
+          await _saveProfileVideo(video.path);
+          Get.snackbar("Success", "Profile video updated successfully.");
+        }
+      } else {
+        final XFile? image = await _picker.pickImage(source: source, imageQuality: 100);
+        if (image != null) {
+          profileImage = File(image.path);
+          await _saveProfileImage(image.path);
+          Get.snackbar("Success", "Profile image updated successfully.");
+        }
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Failed to pick media: $e");
+    } finally {
+      isLoading.value = false;
+      Get.back();
+    }
+  }
+
+  // Save profile image to SharedPreferences
+  Future<void> _saveProfileImage(String imagePath) async {
+    if (userEmail == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profileImage_${userEmail!}', imagePath);
+  }
+
+  // Save profile video to SharedPreferences
+  Future<void> _saveProfileVideo(String videoPath) async {
+    if (userEmail == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profileVideo_${userEmail!}', videoPath);
+  }
+
+  // Delete profile image
+  Future<void> deleteProfileImage() async {
     if (profileImage != null) {
       profileImage = null;
       if (userEmail != null) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.remove(
-            'profileImage_${userEmail!}'); // Remove image from shared_preferences
+        await prefs.remove('profileImage_${userEmail!}');
       }
-      update(); // Update UI
+      update();
       Get.snackbar("Success", "Profile image deleted successfully.");
-    } else {
-      Get.snackbar("Error", "No custom profile image to delete.");
     }
   }
 
-  // Delete Profile Video
-  void deleteProfileVideo() async {
+  // Delete profile video
+  Future<void> deleteProfileVideo() async {
     if (profileVideo != null) {
       profileVideo = null;
       if (userEmail != null) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.remove(
-            'profileVideo_${userEmail!}'); // Remove video from shared_preferences
+        await prefs.remove('profileVideo_${userEmail!}');
       }
-      update(); // Update UI
+      update();
       Get.snackbar("Success", "Profile video deleted successfully.");
-    } else {
-      Get.snackbar("Error", "No custom profile video to delete.");
     }
+  }
+
+  // Reset profile data
+  Future<void> resetProfile() async {
+    profileImage = null;
+    profileVideo = null;
+    if (userEmail != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('profileImage_${userEmail!}');
+      await prefs.remove('profileVideo_${userEmail!}');
+    }
+    update();
+    Get.snackbar("Success", "Profile reset to default.");
+  }
+
+  // Get profile image path or default
+  String getProfileImage() {
+    return profileImage?.path ?? defaultImage;
+  }
+
+  // Get video controller
+  VideoPlayerController? getProfileVideo() {
+    return videoController;
   }
 }

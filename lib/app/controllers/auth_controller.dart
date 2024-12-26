@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:latihan/app/controllers/navigator_controller.dart';
+import 'package:latihan/app/views/admin_view.dart';
 import 'package:latihan/app/views/auth/signin_view.dart';
 import 'package:latihan/app/views/auth/signup_view.dart';
 import 'package:latihan/app/views/home_view.dart';
@@ -32,7 +33,7 @@ class AuthController extends GetxController {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       firebaseUser.bindStream(_auth.authStateChanges());
     });
-    _monitorConnectivity();
+    _monitorConnectivityForSignUp();
     _uploadPendingData();
   }
 
@@ -144,6 +145,16 @@ class AuthController extends GetxController {
     Get.off(() => SigninView(), transition: Transition.noTransition);
   }
 
+  // Sign-In untuk Admin
+  Future<void> signInAsAdmin(String username, String password) async {
+    if (username == 'admin' && password == 'Admin#1234') {
+      Get.off(() => AdminView(), transition: Transition.noTransition);
+      Get.snackbar("Welcome", "Logged in as Admin", backgroundColor: Colors.green);
+    } else {
+      Get.snackbar("Error", "Invalid Admin credentials", backgroundColor: Colors.red);
+    }
+  }
+
   // Email & Password Sign-In
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     Get.dialog(Center(child: CircularProgressIndicator()), barrierDismissible: false);
@@ -164,6 +175,17 @@ class AuthController extends GetxController {
   // Email & Password Registration
   Future<void> signUpWithEmailAndPassword(String email, String password) async {
     try {
+      // Cek koneksi internet
+      var connectivityResult = await Connectivity().checkConnectivity();
+
+      // Jika tidak ada koneksi internet, simpan data secara lokal
+      if (connectivityResult == ConnectivityResult.none) {
+        _saveSignUpDataLocally(email, password);
+        Get.snackbar("Offline", "No internet connection. Data saved locally.", backgroundColor: Colors.orange);
+        return;
+      }
+
+      // Jika ada koneksi, lanjutkan proses signup
       isLoading.value = true;
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -171,7 +193,7 @@ class AuthController extends GetxController {
       );
       firebaseUser.value = userCredential.user;
 
-      // Upload the user details to Firestore
+      // Upload data ke Firestore setelah signup berhasil
       await firestore.collection('users').doc(userCredential.user?.uid).set({
         'email': email,
         'password': password,  // It's not recommended to store passwords in plain text
@@ -180,10 +202,72 @@ class AuthController extends GetxController {
 
       Get.off(SignupView());
       Get.snackbar("Success", "Registration successful", backgroundColor: Colors.green);
+
     } catch (e) {
       Get.snackbar("Error", "Failed to register: $e", backgroundColor: Colors.red);
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // Simpan data signup secara lokal jika tidak ada koneksi
+  void _saveSignUpDataLocally(String email, String password) {
+    List<Map<String, dynamic>> pendingSignUpData =
+        box.read<List<Map<String, dynamic>>>("pendingSignUpData") ?? [];
+    pendingSignUpData.add({
+      "email": email,
+      "password": password, // Simpan password meskipun disarankan untuk tidak menyimpan password mentah
+    });
+    box.write("pendingSignUpData", pendingSignUpData);
+  }
+
+  // Upload data yang tertunda ke Firebase ketika koneksi tersedia
+  Future<void> _uploadPendingSignUpData() async {
+    List<Map<String, dynamic>> pendingSignUpData =
+        box.read<List<Map<String, dynamic>>>("pendingSignUpData") ?? [];
+
+    for (var entry in pendingSignUpData) {
+      try {
+        // Coba upload data ke Firestore
+        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+          email: entry['email'],
+          password: entry['password'],
+        );
+
+        // Setelah berhasil, upload data ke Firestore
+        await firestore.collection('users').doc(userCredential.user?.uid).set({
+          'email': entry['email'],
+          'password': entry['password'],
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        // Hapus data yang berhasil diupload dari GetStorage
+        _removeSignUpDataLocally(entry);
+
+      } catch (e) {
+        // Jika gagal upload, biarkan data tetap ada di GetStorage
+        print("Failed to upload signup data: $e");
+        break;
+      }
+    }
+  }
+
+  // Hapus data yang berhasil diupload dari GetStorage
+  void _removeSignUpDataLocally(Map<String, dynamic> entry) {
+    List<Map<String, dynamic>> pendingSignUpData =
+        box.read<List<Map<String, dynamic>>>("pendingSignUpData") ?? [];
+    pendingSignUpData.remove(entry);
+    box.write("pendingSignUpData", pendingSignUpData);
+  }
+
+  void _monitorConnectivityForSignUp() {
+    Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+      if (results.isNotEmpty) {
+        final connectivityResult = results.first;
+        if (connectivityResult != ConnectivityResult.none) {
+          _uploadPendingData();
+        }
+      }
+    });
   }
 }

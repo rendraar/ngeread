@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:latihan/app/controllers/auth_controller.dart';
 import 'package:latihan/app/controllers/navigator_controller.dart';
 import 'package:latihan/app/models/custom_bottom_navbar.dart';
+import 'package:latihan/app/views/admin_view.dart';
 import 'package:latihan/app/views/auth/signup_view.dart';
 import 'package:latihan/app/views/home_view.dart';
 
@@ -139,11 +140,20 @@ class _LoginPageState extends State<SigninView> {
       onPressed: _authController.isLoading.value
           ? null
           : () async {
+        // Cek jika username dan password adalah admin
+        if (_emailController.text == 'admin' &&
+            _passwordController.text == 'Admin#1234') {
+          // Navigasi ke halaman admin
+          Get.to(() => AdminView(), transition: Transition.rightToLeft);
+          return;
+        }
+
+        // Jika bukan admin, lanjutkan ke proses login biasa
         await _authController.signInWithEmailAndPassword(
           _emailController.text,
           _passwordController.text,
         );
-        // Jika login berhasil
+
         if (_authController.isAuthenticated()) {
           navigationController.resetIndex();
           Get.offAll(() => HomeView(), transition: Transition.noTransition);

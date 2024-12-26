@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latihan/app/controllers/auth_controller.dart';
@@ -14,6 +13,8 @@ class ProfileView extends StatelessWidget {
   final ProfileController profileController = Get.put(ProfileController());
   final MapsController mapsController = Get.put(MapsController());
 
+  final TextEditingController _usernameController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final user = _auth.firebaseUser.value;
@@ -24,12 +25,12 @@ class ProfileView extends StatelessWidget {
       });
     } else {
       profileController.setUserEmail(user.email!);
+      _usernameController.text = user.email?.split('@').first ?? 'Unknown';
     }
 
     // Memastikan lokasi sudah diperbarui saat halaman dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mapsController.locationMessage.value ==
-          "Let's trace your location!") {
+      if (mapsController.locationMessage.value == "Let's trace your location!") {
         mapsController.getCurrentLocation();
       }
     });
@@ -75,8 +76,7 @@ class ProfileView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: Text(
                       "My Profile",
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                   ),
                   SizedBox(height: 30),
@@ -96,17 +96,16 @@ class ProfileView extends StatelessWidget {
                                 backgroundImage: controller.profileImage != null
                                     ? FileImage(controller.profileImage!)
                                     : AssetImage(controller.defaultImage)
-                                        as ImageProvider,
+                                as ImageProvider,
                                 backgroundColor: Colors.transparent,
                               ),
                               SizedBox(height: 10),
-                              Text(
-                                "Username: ${user?.email?.split('@').first ?? 'Unknown'}",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black87,
-                                ),
+                              SizedBox(height: 5),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _showEditUsernameDialog(context);
+                                },
+                                child: Text("Edit Username"),
                               ),
                               SizedBox(height: 5),
                               Text(
@@ -119,14 +118,14 @@ class ProfileView extends StatelessWidget {
                               ),
                               SizedBox(height: 10),
                               Obx(() => Text(
-                                    mapsController.locationMessage.value,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black54,
-                                    ),
-                                  )),
+                                mapsController.locationMessage.value,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black54,
+                                ),
+                              )),
                               SizedBox(height: 10),
                               ElevatedButton(
                                 onPressed: mapsController.openGoogleMaps,
@@ -144,12 +143,12 @@ class ProfileView extends StatelessWidget {
                                           ConnectionState.done) {
                                         return Container(
                                           width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
+                                              .size
+                                              .width *
                                               0.8,
                                           height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
+                                              .size
+                                              .height *
                                               0.3,
                                           child: Stack(
                                             alignment: Alignment.center,
@@ -175,7 +174,7 @@ class ProfileView extends StatelessWidget {
                                                 child: IconButton(
                                                   icon: Icon(
                                                     controller.videoController!
-                                                            .value.isPlaying
+                                                        .value.isPlaying
                                                         ? Icons.pause_circle
                                                         : Icons.play_circle,
                                                     size: 80,
@@ -272,6 +271,40 @@ class ProfileView extends StatelessWidget {
               },
             ),
           ),
+        );
+      },
+    );
+  }
+
+  // Menampilkan dialog untuk edit username
+  void _showEditUsernameDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Edit Username"),
+          content: TextField(
+            controller: _usernameController,
+            decoration: InputDecoration(
+              labelText: "New Username",
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                // Proses untuk menyimpan perubahan username
+                profileController.updateUsername(_usernameController.text);
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
         );
       },
     );

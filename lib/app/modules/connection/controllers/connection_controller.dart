@@ -1,8 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:latihan/app/views/home_view.dart';
-import '../views/no_connection_view.dart';
+import 'package:latihan/app/views/auth/signin_view.dart';
 import 'package:latihan/app/controllers/auth_controller.dart';
 
 class ConnectionController extends GetxController {
@@ -29,10 +28,10 @@ class ConnectionController extends GetxController {
   // Fungsi untuk mengupdate status koneksi
   void _updateConnectionStatus(ConnectivityResult connectivityResult) {
     if (connectivityResult == ConnectivityResult.none) {
-      Get.offAll(() => const NoConnectionView());
+      _showSnackbar(connectivityResult);
     } else {
       if (Get.currentRoute == '/NoConnectionView') {
-        Get.offAll(() => HomeView());
+        Get.offAll(() => SigninView());
       }
       AuthController.instance.uploadPendingData(); // Pastikan data tertunda diupload ketika koneksi kembali
     }

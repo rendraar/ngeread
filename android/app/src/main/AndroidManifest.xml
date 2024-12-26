@@ -2,7 +2,7 @@
     <application
         android:label="ngeread"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ngeread">
         <activity
             android:name=".MainActivity"
             android:exported="true"
