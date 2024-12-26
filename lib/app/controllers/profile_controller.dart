@@ -15,7 +15,9 @@ class ProfileController extends GetxController {
   VideoPlayerController? videoController;
   String? userEmail; // Email as identifier
   String? currentLocation;
-  String? username;
+
+  // Reactive username variable
+  RxString username = ''.obs; // RxString for reactivity
 
   // Default image if no profile picture
   final String defaultImage = "assets/profileDefault.jpg";
@@ -44,16 +46,18 @@ class ProfileController extends GetxController {
 
   // Update username and save it in SharedPreferences
   Future<void> updateUsername(String newUsername) async {
-    username = newUsername;
-    if (userEmail != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('username_${userEmail!}', newUsername);
+    // Hanya update dan tampilkan snackbar jika username berubah
+    if (newUsername != username.value) {
+      username.value = newUsername; // Reactive update
 
-      print(userEmail);
-      print(prefs.get("username_"));
+      if (userEmail != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('username_${userEmail!}',
+            newUsername); // Simpan username ke SharedPreferences
+      }
+      update(); // Mengupdate UI
+      Get.snackbar("Success", "Username updated successfully.");
     }
-    update();
-    Get.snackbar("Success", "Username updated successfully.");
   }
 
   // Load profile data from SharedPreferences
@@ -65,8 +69,9 @@ class ProfileController extends GetxController {
     final videoPath = prefs.getString('profileVideo_${userEmail!}');
     final storedUsername = prefs.getString('username_${userEmail!}');
 
-    // Load stored username
-    username = storedUsername;
+    // Load stored username if available
+    username.value =
+        storedUsername ?? ''; // If no username is stored, use empty string
 
     // Load profile image
     profileImage = imagePath != null ? File(imagePath) : null;
@@ -85,6 +90,8 @@ class ProfileController extends GetxController {
     update();
   }
 
+  // Remaining methods (editProfileImage, addVideo, deleteProfileImage, etc.) stay the same.
+
   // Edit profile image
   Future<void> editProfileImage() async {
     Get.defaultDialog(
@@ -95,12 +102,14 @@ class ProfileController extends GetxController {
           ElevatedButton.icon(
             icon: Icon(Icons.photo),
             label: Text("Gallery"),
-            onPressed: () => _pickImageOrVideo(ImageSource.gallery, isVideo: false),
+            onPressed: () =>
+                _pickImageOrVideo(ImageSource.gallery, isVideo: false),
           ),
           ElevatedButton.icon(
             icon: Icon(Icons.camera),
             label: Text("Camera"),
-            onPressed: () => _pickImageOrVideo(ImageSource.camera, isVideo: false),
+            onPressed: () =>
+                _pickImageOrVideo(ImageSource.camera, isVideo: false),
           ),
         ],
       ),
@@ -117,12 +126,14 @@ class ProfileController extends GetxController {
           ElevatedButton.icon(
             icon: Icon(Icons.video_library),
             label: Text("Gallery"),
-            onPressed: () => _pickImageOrVideo(ImageSource.gallery, isVideo: true),
+            onPressed: () =>
+                _pickImageOrVideo(ImageSource.gallery, isVideo: true),
           ),
           ElevatedButton.icon(
             icon: Icon(Icons.camera),
             label: Text("Camera"),
-            onPressed: () => _pickImageOrVideo(ImageSource.camera, isVideo: true),
+            onPressed: () =>
+                _pickImageOrVideo(ImageSource.camera, isVideo: true),
           ),
         ],
       ),
@@ -130,7 +141,8 @@ class ProfileController extends GetxController {
   }
 
   // Pick image or video
-  Future<void> _pickImageOrVideo(ImageSource source, {required bool isVideo}) async {
+  Future<void> _pickImageOrVideo(ImageSource source,
+      {required bool isVideo}) async {
     try {
       isLoading.value = true;
 
@@ -146,7 +158,8 @@ class ProfileController extends GetxController {
           Get.snackbar("Success", "Profile video updated successfully.");
         }
       } else {
-        final XFile? image = await _picker.pickImage(source: source, imageQuality: 100);
+        final XFile? image =
+            await _picker.pickImage(source: source, imageQuality: 100);
         if (image != null) {
           profileImage = File(image.path);
           await _saveProfileImage(image.path);

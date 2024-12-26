@@ -11,7 +11,6 @@ plugins {
 dependencies {
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:33.4.0')
-    implementation "io.flutter:flutter_embedding_debug:1.0.0"
     implementation 'com.google.firebase:firebase-analytics'
 
     // TODO: Add the dependencies for Firebase products you want to use
